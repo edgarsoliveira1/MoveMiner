@@ -11,7 +11,7 @@ from moveminer.preprocessing import (
   noise_filter,
   segmentation
 )
-from moveminer.management import *
+from moveminer.management.management import *
 from moveminer.uncertainty import *
 from moveminer.privacy import attacks
 from moveminer.generators import *
