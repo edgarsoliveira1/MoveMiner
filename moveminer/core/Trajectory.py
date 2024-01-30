@@ -3,12 +3,12 @@ from shapely.geometry import Point
 from moveminer.utils import distance_metrics
 from moveminer.utils import constants
 from geopandas import GeoDataFrame
-from pandas import to_datetime
+from pandas import DataFrame, to_datetime
 
 class Trajectory:
     def __init__(
         self,
-        df,
+        df: GeoDataFrame | DataFrame,
         x=constants.LATITUDE,
         y=constants.LONGITUDE,
         t=constants.DATETIME,
