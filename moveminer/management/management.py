@@ -1,15 +1,21 @@
+from moveminer.core.Trajectory import Trajectory
+from moveminer.management.erp import erp
 from shapely import LineString, Point
-import traj_dist.distance as tdist
-from ..core.Trajectory import Trajectory
+from moveminer.utils import constants
 from datetime import datetime
 import numpy as np
 
-def spacial_query(t:Trajectory, xmin: float, ymin: float, xmax: float, ymax: float) -> Trajectory:
+
+def spacial_query(
+    t: Trajectory, xmin: float, ymin: float, xmax: float, ymax: float
+) -> Trajectory:
     query = t.copy()
-    query.gdf = query.gdf.clip_by_rect(xmin, ymin, xmax, ymax)
+    query.gdf["geometry"] = query.gdf.clip_by_rect(xmin, ymin, xmax, ymax)
+    query.gdf = query.gdf[~query.gdf.is_empty]
     return query
-    
-def temporal_query(t:Trajectory, start, end) -> Trajectory:
+
+
+def temporal_query(t: Trajectory, start, end) -> Trajectory:
     query = t.copy()
     if not isinstance(start, datetime):
         start = datetime.fromisoformat(start).time()
@@ -18,29 +24,32 @@ def temporal_query(t:Trajectory, start, end) -> Trajectory:
     query.gdf = query.gdf.between_time(start, end)
     return query
 
-def knn_query(t:Trajectory, k:int, geo: Point|LineString):
+
+def knn_query(t: Trajectory, k: int, geo: Point | LineString):
     query = t.copy()
     gdf = query.gdf
     distances = []
-    for point in gdf['geometry']:
+    for point in gdf[constants.GEOMETRY]:
         distance = geo.distance(point)
         distances.append(distance)
-    query.gdf['distance'] = distances
-    query.gdf = query.gdf.sort_values(by='distance').head(k)
+    query.gdf[constants.DISTANCE] = distances
+    query.gdf = query.gdf.sort_values(by=constants.DISTANCE).head(k)
     return query
 
+
 def _trajectory2npArray(t: Trajectory):
-    x = t.gdf['geometry'].x
-    y = t.gdf['geometry'].y
+    x = t.gdf[constants.GEOMETRY].x
+    y = t.gdf[constants.GEOMETRY].y
     return np.column_stack([x, y])
 
-def similarity_query(t:Trajectory, TS:[Trajectory]):
+
+def similarity_query(t: Trajectory, TS: [Trajectory]):
     closest_trajectory = None
     smallest_distance = 0
     for ts in TS:
         traj_A = _trajectory2npArray(t)
         traj_B = _trajectory2npArray(ts)
-        distance = tdist.erp(traj_A, traj_B)
+        distance = erp(traj_A, traj_B, None)
         if smallest_distance < distance:
             closest_trajectory = ts
             smallest_distance = distance
