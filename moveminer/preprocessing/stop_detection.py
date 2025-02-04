@@ -35,10 +35,10 @@ def speed(traj: Trajectory, speed_threshold) -> Trajectory:
     for i in range(len(points) - 1):
         pi = points[i]
         pj = points[i + 1]
-        dist = t.distance(pi, pj) * 1000 # meters
-        time = (datetimes[i + 1] - datetimes[i]).total_seconds() # seconds
+        dist = t.distance(pi, pj) * 1000  # meters
+        time = (datetimes[i + 1] - datetimes[i]).total_seconds()  # seconds
         assert time > 0
-        speed = dist / time # m/s
+        speed = dist / time  # m/s
         t_gdf[constants.SPEED][i] = speed
         if speed <= speed_threshold:
             t_gdf[constants.STOP][i] = True

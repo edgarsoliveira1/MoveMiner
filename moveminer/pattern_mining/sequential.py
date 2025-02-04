@@ -1,6 +1,7 @@
 from moveminer.core.Trajectory import Trajectory
 from moveminer.utils import constants
 
+
 def cluster_sequences(traj: Trajectory):
     if not constants.CLUSTER in traj.gdf.columns:
         return [], []
@@ -21,13 +22,15 @@ def cluster_sequences(traj: Trajectory):
         seqs.append(traj_seq)
     return uids, seqs
 
+
 from typing import List
+
 
 class PrefixSpan:
     def __init__(self, min_sup=2) -> None:
         self.min_sup = min_sup
 
-    def prefix_span(self, prefix:List[any], S:List[List[any]]):
+    def prefix_span(self, prefix: List[any], S: List[List[any]]):
         # count items
         count = {}
         for s in S:
@@ -39,20 +42,21 @@ class PrefixSpan:
         # remove infrequent items
         L = [(k, v) for k, v in count.items() if v >= self.min_sup]
         # for each frequent item, make a project e call prefix again
-        for (a, v) in sorted(L, key=lambda x: x[1], reverse=True):
+        for a, v in sorted(L, key=lambda x: x[1], reverse=True):
             yield (prefix + [a], v)
             _S = self._project(S, a)
             if _S:
                 yield from self.prefix_span(prefix + [a], _S)
-        
+
     def _project(self, S, a):
         _S = []
         for s in S:
             for i in range(len(s)):
                 if s[i] == a:
-                    _S.append(s[i + 1:])
+                    _S.append(s[i + 1 :])
                     break
         return _S
+
 
 # # Test input:
 # sequences = [

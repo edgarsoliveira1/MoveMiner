@@ -5,11 +5,11 @@ __version__ = "0.0.1"
 from moveminer.core.Trajectory import Trajectory
 from moveminer.utils import *
 from moveminer.preprocessing import (
-  stop_detection,
-  compression,
-  map_matching,
-  noise_filter,
-  segmentation
+    stop_detection,
+    compression,
+    map_matching,
+    noise_filter,
+    segmentation,
 )
 from moveminer.management.management import *
 from moveminer.uncertainty import *

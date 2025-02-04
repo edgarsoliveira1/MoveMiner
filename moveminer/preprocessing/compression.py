@@ -2,10 +2,11 @@ from moveminer.core.Trajectory import Trajectory
 from shapely.geometry import LineString
 from moveminer.utils import constants
 
+
 class SimpleSpacialCompression:
     def __init__(self, threshold: float):
         self.threshold = threshold
-    
+
     def __call__(self, traj: Trajectory) -> Trajectory:
         t = traj.copy()
         gdf = t.gdf

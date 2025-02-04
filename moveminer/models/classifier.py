@@ -3,6 +3,7 @@ from moveminer.utils import constants
 from tensorflow import keras
 import numpy as np
 
+
 class TrajDeepFeedForward:
     def __init__(self, input_size, output_size) -> None:
         self.input_shape = (input_size,)
@@ -21,18 +22,17 @@ class TrajDeepFeedForward:
             ]
         )
 
-    def compile(self,
-                optimizer='adam',
-                loss='binary_crossentropy',
-                metrics=[
-                    keras.metrics.Accuracy(name="accuracy"),
-                    keras.metrics.Precision(name="precision"),
-                    keras.metrics.Recall(name="recall")
-                ]
-        ):
-        self.dff.compile(optimizer=optimizer,
-                    loss=loss, 
-                    metrics=metrics)
+    def compile(
+        self,
+        optimizer="adam",
+        loss="binary_crossentropy",
+        metrics=[
+            keras.metrics.Accuracy(name="accuracy"),
+            keras.metrics.Precision(name="precision"),
+            keras.metrics.Recall(name="recall"),
+        ],
+    ):
+        self.dff.compile(optimizer=optimizer, loss=loss, metrics=metrics)
 
     def fit(self, train_X, train_y, val_X, val_y, callbacks=[], class_weight={}):
         self.dff.fit(
@@ -42,10 +42,12 @@ class TrajDeepFeedForward:
             epochs=30,
             verbose=2,
             callbacks=callbacks,
-            validation_data=(np.asarray(val_X).astype(np.float64),
-                            np.asarray(val_y).astype(np.float64)),
+            validation_data=(
+                np.asarray(val_X).astype(np.float64),
+                np.asarray(val_y).astype(np.float64),
+            ),
             class_weight=class_weight,
         )
-    
+
     def predict(self, test_X):
         return self.dff.predict(np.asarray(test_X).astype(np.float64)).astype(bool)
