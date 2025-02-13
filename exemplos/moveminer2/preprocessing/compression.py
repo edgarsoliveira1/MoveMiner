@@ -8,7 +8,7 @@ from ..utils.config import col_names
 
 class CompressionStrategy(ABC):
     @abstractmethod
-    def compress(self, trajectory: Trajectory, **kwargs) -> Trajectory:
+    def compress(self, trajectory: Trajectory, *args, **kwargs) -> Trajectory:
         """
         Compress the trajectory data.
 
@@ -22,7 +22,9 @@ class CompressionStrategy(ABC):
 
 
 class TimeCompression(CompressionStrategy):
-    def compress(self, trajectory: Trajectory, max_timediff_s: float) -> pd.DataFrame:
+    def compress(
+        self, trajectory: Trajectory, max_timediff_s: float
+    ) -> pd.DataFrame:
         # Keep only the points where the time difference exceeds the threshold
         mask = trajectory[col_names.TIME_DIFF] > max_timediff_s
         compressed_data = trajectory[mask]
@@ -30,7 +32,9 @@ class TimeCompression(CompressionStrategy):
 
 
 class DistanceCompression(CompressionStrategy):
-    def compress(self, trajectory: Trajectory, max_distance_m: float) -> pd.DataFrame:
+    def compress(
+        self, trajectory: Trajectory, max_distance_m: float
+    ) -> pd.DataFrame:
         # Keep only the points where the distance exceeds the threshold
         mask = trajectory[col_names.DISTANCE] > max_distance_m
         compressed_data = trajectory[mask]
@@ -38,7 +42,9 @@ class DistanceCompression(CompressionStrategy):
 
 
 class SpeedCompression(CompressionStrategy):
-    def compress(self, trajectory: Trajectory, max_speed_ms: float) -> pd.DataFrame:
+    def compress(
+        self, trajectory: Trajectory, max_speed_ms: float
+    ) -> pd.DataFrame:
         # Keep only the points where the speed exceeds the threshold
         mask = trajectory[col_names.SPEED] > max_speed_ms
         compressed_data = trajectory[mask]
@@ -57,5 +63,7 @@ class TrajectoryCompressor:
     def set_strategy(self, strategy: CompressionStrategy):
         self._strategy = strategy
 
-    def compress_trajectory(self, trajectory: Trajectory, **kwargs) -> Trajectory:
-        return self._strategy.compress(trajectory, **kwargs)
+    def compress_trajectory(
+        self, trajectory: Trajectory, *args, **kwargs
+    ) -> Trajectory:
+        return self._strategy.compress(trajectory, *args, **kwargs)

@@ -20,9 +20,18 @@ from ..metrics.turning_angle_calculation import (
     HaversineTurningAngleCalculation,
     TurningAngleCalculator,
 )
-from ..patterns.cluster_detection import ClusterDetector, KMeansClusterDetection
-from ..preprocessing.compression import StopCompression, TrajectoryCompressor
-from ..preprocessing.outlier_detection import OutlierDetector, SpeedOutlierDetector
+from ..patterns.cluster_detection import (
+    ClusterDetector,
+    KMeansClusterDetection,
+)
+from ..preprocessing.compression import (
+    DistanceCompression,
+    TrajectoryCompressor,
+)
+from ..preprocessing.outlier_detection import (
+    OutlierDetector,
+    SpeedOutlierDetector,
+)
 from ..preprocessing.segmentation import StopSegmentation, TrajectorySegmenter
 from ..preprocessing.stop_detection import SpeedStopDetection, StopDetector
 from ..visualization.plot_heatmap import HeatmapPlotter, HvHeatmapPlotStrategy
@@ -42,8 +51,12 @@ class Analyzer:
                 HaversineDistanceCalculation()
             )
             if not is_geo:
-                self.distance_calculator.set_strategy(EuclideanDistanceCalculation())
-            self.timediff_calculator = TimeDiffCalculator(SimpleTimeDiffCalculation())
+                self.distance_calculator.set_strategy(
+                    EuclideanDistanceCalculation()
+                )
+            self.timediff_calculator = TimeDiffCalculator(
+                SimpleTimeDiffCalculation()
+            )
             self.turning_angle_calculator = TurningAngleCalculator(
                 HaversineTurningAngleCalculation()
             )
@@ -51,7 +64,9 @@ class Analyzer:
             self.radius_calculator = RadiusGyrationCalculator(
                 HaversineRadiusGyrationCalculation()
             )
-            self.od_matrix_calculator = ODMatrixCalculator(ClusterODMatrixCalculation())
+            self.od_matrix_calculator = ODMatrixCalculator(
+                ClusterODMatrixCalculation()
+            )
 
         # Adicione métodos para calcular métricas específicas aqui
 
@@ -60,7 +75,7 @@ class Analyzer:
             self.stop_detector = StopDetector(SpeedStopDetection())
             self.outlier_detector = OutlierDetector(SpeedOutlierDetector())
             self.cluster_detector = ClusterDetector(KMeansClusterDetection())
-            self.compressor = TrajectoryCompressor(StopCompression())
+            self.compressor = TrajectoryCompressor(DistanceCompression())
             self.segmenter = TrajectorySegmenter(StopSegmentation())
 
     class _VisualizationFacade:

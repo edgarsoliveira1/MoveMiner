@@ -68,56 +68,39 @@ class DistanceCalculator:
             lambda t: t[col_names.DISTANCE].sum()
         )
 
-    def calculate_straight_line_distance(self, trajectory: Trajectory) -> pd.DataFrame:
-        def calculate_group_straight_line_distance(group: pd.DataFrame):
-            point1 = group.iloc[[0]]
-            point2 = group.iloc[[-1]]
-            return self._strategy.calculate(
-                point1[col_names.X],
-                point1[col_names.Y],
-                point2[col_names.X],
-                point2[col_names.Y],
-            )
-
-        return trajectory.groupby(col_names.TRAJECTORY_ID).apply(
-            calculate_group_straight_line_distance
-        )
-
-    def calculate_radius_of_gyration(self, trajectory: Trajectory) -> Trajectory:
-        trajectory["x_mean"] = trajectory.groupby(col_names.TRAJECTORY_ID)[
-            col_names.X
-        ].transform("mean")
-        trajectory["y_mean"] = trajectory.groupby(col_names.TRAJECTORY_ID)[
-            col_names.Y
-        ].transform("mean")
-        trajectory = dd.from_pandas(
-            trajectory, npartitions=trajectory.npartitions, sort=True
-        )
-        trajectory["squared_radius_distance"] = trajectory.map_partitions(
+    def calculate_straight_line_distance(
+        self, trajectory: Trajectory
+    ) -> pd.DataFrame:
+        df = trajectory.groupby(col_names.TRAJECTORY_ID).agg(
+            first_t=(col_names.T, "first"),
+            first_x=(col_names.X, "first"),
+            first_y=(col_names.Y, "first"),
+            last_t=(col_names.T, "last"),
+            last_x=(col_names.X, "last"),
+            last_y=(col_names.Y, "last"),
+        ).reset_index()
+        df = dd.from_pandas(df, npartitions=trajectory.npartitions)
+        df[col_names.STRAIGHT_LINE_DISTANCE] = df.map_partitions(
             lambda d: self._strategy.calculate(
-                d["y_mean"],
-                d["x_mean"],
-                d[col_names.Y],
-                d[col_names.X],
-            )
-            ** 2,
-            meta=("radius_distance", "f8"),
-        ).fillna(0)
-        trajectory = trajectory
-        return (
-            trajectory.groupby(col_names.TRAJECTORY_ID)["squared_radius_distance"]
-            .transform("mean")
-            .apply(np.sqrt)
-        ).compute()
+                d[col_names.FIRST_Y],
+                d[col_names.FIRST_X],
+                d[col_names.LAST_Y],
+                d[col_names.LAST_X],
+            ),
+            meta=(col_names.STRAIGHT_LINE_DISTANCE, "f8"),
+        )
+        return df.compute()
 
     def add_distance_column(self, trajectory: Trajectory) -> Trajectory:
-        trajectory[col_names.PREV_X] = trajectory.groupby(col_names.TRAJECTORY_ID)[
-            col_names.X
-        ].shift(1)
-        trajectory[col_names.PREV_Y] = trajectory.groupby(col_names.TRAJECTORY_ID)[
-            col_names.Y
-        ].shift(1)
-        trajectory = dd.from_pandas(trajectory, npartitions=trajectory.npartitions)
+        trajectory[col_names.PREV_X] = trajectory.groupby(
+            col_names.TRAJECTORY_ID
+        )[col_names.X].shift(1)
+        trajectory[col_names.PREV_Y] = trajectory.groupby(
+            col_names.TRAJECTORY_ID
+        )[col_names.Y].shift(1)
+        trajectory = dd.from_pandas(
+            trajectory, npartitions=trajectory.npartitions
+        )
         trajectory[col_names.DISTANCE] = trajectory.map_partitions(
             lambda d: self._strategy.calculate(
                 d[col_names.PREV_Y],
