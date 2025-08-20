@@ -1,3 +1,4 @@
+from sklearn.cluster import DBSCAN
 from ..metrics.distance_calculation import (
     DistanceCalculator,
     EuclideanDistanceCalculation,
@@ -22,6 +23,7 @@ from ..metrics.turning_angle_calculation import (
 )
 from ..patterns.cluster_detection import (
     ClusterDetector,
+    DBSCANClusterDetection,
     KMeansClusterDetection,
 )
 from ..preprocessing.compression import (
@@ -78,6 +80,11 @@ class Analyzer:
             self.compressor = TrajectoryCompressor(DistanceCompression())
             self.segmenter = TrajectorySegmenter(StopSegmentation())
 
+    class PatternMiningFacade:
+        def __init__(self):
+            self.cluster_detector = ClusterDetector(DBSCANClusterDetection())
+            # self.moving_together = MovingTogetherDetector(EncounterDetector())
+
     class _VisualizationFacade:
         def __init__(self):
             self.spatial_plotter = PointPlotter(PointPlotStrategy())
@@ -89,6 +96,7 @@ class Analyzer:
     def __init__(self, is_geo=True):
         self.metrics = self._MetricsFacade(is_geo)
         self.preprocessing = self._PreprocessingFacade()
+        self.pattern_mining = self.PatternMiningFacade()
         self.visualizer = self._VisualizationFacade()
 
     def spatial_plot(self, *args, **kwargs):

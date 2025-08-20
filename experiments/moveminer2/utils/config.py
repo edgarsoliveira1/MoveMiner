@@ -36,6 +36,7 @@ class _ColumnNames:
     OUTLIER = "outlier"
     CLUSTER = "cluster"
     TURNING_ANGLE = "turning_angle"
+    ANOMALY_SCORE = "anomaly_score"
 
 
 # Acesso às variáveis globais

@@ -45,8 +45,8 @@ class DBSCANClusterDetection(ClusterDetectionStrategy):
         db = DBSCAN(
             eps=eps,
             min_samples=min_samples,
-            algorithm="ball_tree",
             metric="haversine",
+            algorithm="ball_tree",
         ).fit(coords)
         labels = db.labels_
 
@@ -56,7 +56,9 @@ class DBSCANClusterDetection(ClusterDetectionStrategy):
 
 
 class KMeansClusterDetection(ClusterDetectionStrategy):
-    def detect(self, trajectory: Trajectory, n_clusters: int = 8) -> pd.DataFrame:
+    def detect(
+        self, trajectory: Trajectory, n_clusters: int = 8
+    ) -> pd.DataFrame:
         # Ensure that the necessary columns are present
         if (
             col_names.X not in trajectory.columns
